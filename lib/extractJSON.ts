@@ -4,10 +4,36 @@ function stripFences(raw: string): string {
 
 function sliceOutermost(raw: string): string {
   const start = raw.indexOf("{");
-  const end = raw.lastIndexOf("}");
   if (start === -1) throw new Error("JSONが見つかりません");
-  if (end === -1 || end < start) return raw.slice(start);
-  return raw.slice(start, end + 1);
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+    if (ch === "{") depth++;
+    else if (ch === "}") {
+      depth--;
+      if (depth === 0) return raw.slice(start, i + 1);
+    }
+  }
+  // 末尾が切れている場合はそのまま返してStage 3に任せる
+  return raw.slice(start);
 }
 
 // Stage 1: 制御文字をエスケープしてそのままパース
