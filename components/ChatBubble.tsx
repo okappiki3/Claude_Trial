@@ -1,11 +1,13 @@
-import type { Message } from "@/lib/types";
+import type { Expert } from "@/lib/types";
 
 interface Props {
-  message: Message;
+  expert: Expert;
+  text: string;
+  phaseLabel?: string;
+  choice?: "A" | "B";
 }
 
-export function ChatBubble({ message }: Props) {
-  const { expert, text, roundLabel } = message;
+export function ChatBubble({ expert, text, phaseLabel, choice }: Props) {
   return (
     <div className="flex animate-fadeSlideIn gap-3">
       <div
@@ -15,20 +17,26 @@ export function ChatBubble({ message }: Props) {
         {expert.emoji}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center gap-2">
+        <div className="mb-1 flex flex-wrap items-center gap-2">
           <span className="text-sm font-bold" style={{ color: expert.color }}>
             {expert.name}
           </span>
           <span className="text-xs text-text-muted">{expert.role}</span>
-          <span
-            className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-text-muted"
-          >
-            {roundLabel}
-          </span>
+          {phaseLabel && (
+            <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-text-muted">
+              {phaseLabel}
+            </span>
+          )}
+          {choice && (
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+              style={{ background: choice === "A" ? "#0ea5e9" : "#8b5cf6" }}
+            >
+              {choice === "A" ? "A: 防御" : "B: ピボット"}
+            </span>
+          )}
         </div>
-        <div
-          className="rounded-2xl rounded-tl-sm bg-surface px-4 py-3 text-[15px] leading-relaxed text-text shadow-sm ring-1 ring-border"
-        >
+        <div className="whitespace-pre-wrap rounded-2xl rounded-tl-sm bg-surface px-4 py-3 text-[15px] leading-relaxed text-text shadow-sm ring-1 ring-border">
           {text}
         </div>
       </div>

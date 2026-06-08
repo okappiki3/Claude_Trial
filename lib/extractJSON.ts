@@ -1,6 +1,4 @@
-import type { Proposal } from "./types";
-
-export function extractJSON(raw: string): Proposal {
+export function extractJSON<T>(raw: string): T {
   let s = raw.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
   const start = s.indexOf("{");
   const end = s.lastIndexOf("}");
@@ -12,5 +10,5 @@ export function extractJSON(raw: string): Proposal {
     if (ch === "\t") return "\\t";
     return "";
   });
-  return JSON.parse(s) as Proposal;
+  return JSON.parse(s) as T;
 }

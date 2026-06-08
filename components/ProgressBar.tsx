@@ -16,7 +16,8 @@ export function ProgressBar({ value, label }: Props) {
           className="h-full rounded-full transition-all duration-500 ease-out"
           style={{
             width: `${pct}%`,
-            background: "linear-gradient(90deg,#0ea5e9 0%,#8b5cf6 50%,#f59e0b 100%)",
+            background:
+              "linear-gradient(90deg,#0ea5e9 0%,#8b5cf6 33%,#f59e0b 66%,#dc2626 100%)",
           }}
         />
       </div>
