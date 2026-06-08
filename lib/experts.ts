@@ -116,19 +116,33 @@ export const FINAL_SCORE_SYSTEM_PROMPT = `あなたは議論バトルの最終�
 【出力JSON形式】
 {"final_scores":[{"expertId":"tech","hp":85,"breakdown":{"base":100,"phase1_bonus":12,"phase2_bonus":8,"agreement_penalty":0,"boss_battle":-5,"pivot_bonus":0},"rank":1,"title":"MVP"},{"expertId":"biz","hp":72,"breakdown":{"base":100,"phase1_bonus":8,"phase2_bonus":10,"agreement_penalty":-20,"boss_battle":-10,"pivot_bonus":5},"rank":2,"title":"Survivor"},{"expertId":"mkt","hp":45,"breakdown":{"base":100,"phase1_bonus":10,"phase2_bonus":5,"agreement_penalty":0,"boss_battle":-30,"pivot_bonus":0},"rank":3,"title":"Defeated"}],"mvp":"tech","mvp_reason":"MVP選出理由"}`;
 
-export const PROPOSAL_SYSTEM_PROMPT = `あなたは優秀な戦略コンサルタントです。激しい議論バトルを経て生き残った主張のみを使って提案書を作成します。
+export const DECISION_MAP_SYSTEM_PROMPT = `あなたの役割は、完成された提案書を書くことではありません。
+議論で生き残った主張、論破された主張、未解決の論点、次に検証すべき仮説を整理してください。
 
-【重要なルール】
+【絶対に守るルール】
+- 議論に登場していない情報を勝手に補ってはいけません
+- 新しい数字、企業事例、製品名、ツール名、効果予測を追加してはいけません
+- 議論で言及された数字や事例も、根拠が示されていなければ「根拠未確認」と注記すること
+- もっともらしい物語を作るより、判断できないことを正確に残すことを優先してください
+
+【分類ルール】
+各主張を必ず以下のいずれかに分類してください:
+- confirmed_fact: ユーザーの入力に明記されている事実
+- survived_hypothesis: 議論で一定の妥当性が認められたが、検証が必要な仮説
+- killed: 議論で重大な欠陥が指摘された主張
+- unresolved: 追加情報なしでは判断できない論点
+- next_quest: 7日以内に確認できる具体的な行動
+
+【出力ルール】
 - 必ず有効なJSON形式のみで回答してください
 - JSON以外のテキストは一切含めないでください
 - 文字列値の中に改行を入れないでください。改行が必要な場合は読点で区切ってください
-- 各フィールドは必ず値を入れてください
-- 悪魔に論破された主張は「proposals」に含めないこと
-- 生き残った主張と、バトルで強化された修正案のみを採用すること
-- battle_statsの数値は実際のバトル記録から計算すること
+- 各配列は最低1件以上、無理に水増しせず議論から拾える分だけ記載してください
+- claim や cause_of_death は議論中の表現をできるだけそのまま使うこと
+- battle_statsの数値は実際のバトル記録(攻撃数・生存数・墓場行き数)から計算すること
 
 以下のJSON構造に従ってください:
-{"title":"提案タイトル","summary":"エグゼクティブサマリー(200文字程度)","background":"背景と課題(300文字程度)","battle_highlight":"この提案は3人の専門家と悪魔の代弁者による激論を経て、生き残った主張のみで構成されています。(議論の激しさを伝える一文)","proposals":[{"title":"提案項目のタイトル","description":"具体的な内容(200文字程度)","impact":"期待される効果","survived_from":"この提案を主張した専門家名","battle_tested":"バトルでどう鍛えられたか(一文)"}],"roadmap":[{"phase":"フェーズ名","period":"期間","tasks":"主なタスク"}],"risks":[{"risk":"リスク内容","mitigation":"対策","identified_by":"このリスクを指摘した者(専門家名 or 悪魔の代弁者)"}],"graveyard":[{"argument":"論破された主張の要約","killed_by":"論破した者の名前","cause_of_death":"論破された理由(一文)"}],"conclusion":"結論と次のステップ(200文字程度)","mvp":{"name":"MVP専門家名","reason":"MVP選出理由"},"battle_stats":{"total_attacks":6,"arguments_survived":0,"arguments_killed":0,"fiercest_moment":"最も激しかった瞬間の要約(一文)"}}`;
+{"title":"テーマ名を反映したDecision Mapタイトル","battle_summary":"バトル全体の要約。何が起き、何が生き残り、何が死んだか。100文字程度","survived":[{"claim":"生き残った主張(議論の中の表現をそのまま使う)","supported_by":"この主張を支持した専門家名","confidence":"high","caveat":"条件や留保事項(なければ「なし」)"}],"killed":[{"claim":"論破された主張の要約","killed_by":"論破した者の名前","cause_of_death":"論破された理由(議論中の指摘をそのまま引用)"}],"unresolved":[{"question":"まだ決めてはいけない論点","why_unresolved":"なぜ今は判断できないか","depends_on":"判断に必要な情報"}],"next_quests":[{"quest":"7日以内に確認すべき具体的な行動","purpose":"この行動で何が判明するか","owner":"誰がやるべきか(社長/コンサルタント/現場等)"}],"hypothesis_cards":[{"hypothesis":"検証すべき仮説。○○は△△の場合に有効かもしれない、の形式","required_evidence":"この仮説を検証するために必要な情報","verdict_criteria":"どうなれば採用/棄却か"}],"mvp":{"name":"MVP専門家名","reason":"MVP選出理由"},"battle_stats":{"total_attacks":6,"arguments_survived":0,"arguments_killed":0,"fiercest_moment":"最も激しかった瞬間の要約(一文)"},"graveyard_note":"墓場の主張が提案書に復活することはない。次のバトルで新しい根拠とともに再提出せよ。"}`;
 
 export const PHASES = [
   { num: 1, name: "Opening Statements", icon: "⚔️" },
@@ -233,7 +247,7 @@ ${verdictJson}
 
 上記のスコアと判定をもとに、各専門家の最終HPを算出してください。`;
 
-export const PROPOSAL_PROMPT = (
+export const DECISION_MAP_PROMPT = (
   theme: string,
   fullContext: string,
   verdictJson: string,
@@ -249,7 +263,10 @@ ${verdictJson}
 【最終スコア】
 ${finalScoresJson}
 
-上記の記録をもとに、生き残った主張のみで構成された提案書を作成してください。論破されて墓場に送られた主張はproposalsには含めず、graveyardセクションに記録すること。`;
+上記の記録のみを使って Decision Map を作成してください。
+記録に出てこない数字・企業名・製品名・ツール名・効果予測を勝手に追加してはいけません。
+生き残った主張(survived)、墓場行き(killed)、未解決の論点(unresolved)、7日以内のクエスト(next_quests)、検証すべき仮説(hypothesis_cards)に分類してください。
+判断できないことは無理に判断せず、unresolved または hypothesis_cards に残すことを優先してください。`;
 
 export const expertById = (id: ExpertId): Expert =>
   EXPERTS.find((e) => e.id === id)!;

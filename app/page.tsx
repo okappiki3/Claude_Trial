@@ -3,18 +3,17 @@
 import { useMemo, useRef, useState } from "react";
 import { AttackBubble } from "@/components/AttackBubble";
 import { ChatBubble } from "@/components/ChatBubble";
+import { DecisionMap as DecisionMapView } from "@/components/DecisionMap";
 import { DevilCard, ExpertCard } from "@/components/ExpertCard";
 import { DevilBubble } from "@/components/DevilBubble";
 import { FinalScoreBoard } from "@/components/FinalScoreBoard";
-import { Graveyard } from "@/components/Graveyard";
 import { PhaseDivider } from "@/components/PhaseDivider";
 import { ProgressBar } from "@/components/ProgressBar";
-import { ProposalDocument } from "@/components/ProposalDocument";
 import { ScoreBoard } from "@/components/ScoreBoard";
 import { EXPERTS, PHASES, expertById } from "@/lib/experts";
 import type {
   BattleMessage,
-  BattleProposal,
+  DecisionMap,
   DevilVerdict,
   ExpertId,
   ExpertTitle,
@@ -72,7 +71,7 @@ export default function Page() {
   const [judgeScores, setJudgeScores] = useState<JudgeScore | null>(null);
   const [devilVerdict, setDevilVerdict] = useState<DevilVerdict | null>(null);
   const [finalScores, setFinalScores] = useState<FinalScores | null>(null);
-  const [proposal, setProposal] = useState<BattleProposal | null>(null);
+  const [proposal, setProposal] = useState<DecisionMap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -518,19 +517,14 @@ export default function Page() {
       )}
 
       {proposal && (
-        <>
-          <section className="mt-10">
-            <PhaseDivider
-              phaseNumber={5}
-              name="Battle-Tested Proposal"
-              icon="📄"
-            />
-            <ProposalDocument proposal={proposal} />
-          </section>
-          <section className="mt-10">
-            <Graveyard entries={proposal.graveyard} />
-          </section>
-        </>
+        <section className="mt-10">
+          <PhaseDivider
+            phaseNumber={5}
+            name="Battle-Tested Decision Map"
+            icon="🗺️"
+          />
+          <DecisionMapView data={proposal} />
+        </section>
       )}
 
       {(phase === "done" || phase === "error") && (

@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  DECISION_MAP_PROMPT,
+  DECISION_MAP_SYSTEM_PROMPT,
   DEVIL,
   DEVIL_ATTACK_PROMPT,
   DEVIL_VERDICT_PROMPT,
@@ -12,14 +14,12 @@ import {
   PHASE1_USER_PROMPT,
   PHASE2_ATTACK_PROMPT,
   PHASES,
-  PROPOSAL_PROMPT,
-  PROPOSAL_SYSTEM_PROMPT,
   REBUTTAL_PROMPT,
   expertById,
 } from "@/lib/experts";
 import { extractJSON } from "@/lib/extractJSON";
 import type {
-  BattleProposal,
+  DecisionMap,
   DevilVerdict,
   ExpertId,
   FinalScores,
@@ -384,12 +384,12 @@ export async function POST(req: Request) {
         });
         const proposalResp = await call({
           model: MODEL,
-          max_tokens: 4096,
-          system: PROPOSAL_SYSTEM_PROMPT,
+          max_tokens: 8192,
+          system: DECISION_MAP_SYSTEM_PROMPT,
           messages: [
             {
               role: "user",
-              content: PROPOSAL_PROMPT(
+              content: DECISION_MAP_PROMPT(
                 theme,
                 fullContext,
                 JSON.stringify(verdict),
@@ -398,8 +398,8 @@ export async function POST(req: Request) {
             },
           ],
         });
-        const proposal = extractJSON<BattleProposal>(textOf(proposalResp));
-        send({ type: "proposal", data: proposal });
+        const decisionMap = extractJSON<DecisionMap>(textOf(proposalResp));
+        send({ type: "proposal", data: decisionMap });
 
         send({ type: "done" });
       } catch (err) {

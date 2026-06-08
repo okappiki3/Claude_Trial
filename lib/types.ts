@@ -117,16 +117,45 @@ export interface RiskItem {
   identified_by: string;
 }
 
-export interface BattleProposal {
+export interface SurvivedClaim {
+  claim: string;
+  supported_by: string;
+  confidence: "high" | "medium";
+  caveat: string;
+}
+
+export interface KilledClaim {
+  claim: string;
+  killed_by: string;
+  cause_of_death: string;
+}
+
+export interface UnresolvedQuestion {
+  question: string;
+  why_unresolved: string;
+  depends_on: string;
+}
+
+export interface NextQuest {
+  quest: string;
+  purpose: string;
+  owner: string;
+}
+
+export interface HypothesisCard {
+  hypothesis: string;
+  required_evidence: string;
+  verdict_criteria: string;
+}
+
+export interface DecisionMap {
   title: string;
-  summary: string;
-  background: string;
-  battle_highlight: string;
-  proposals: ProposalItem[];
-  roadmap: RoadmapItem[];
-  risks: RiskItem[];
-  graveyard: GraveyardEntry[];
-  conclusion: string;
+  battle_summary: string;
+  survived: SurvivedClaim[];
+  killed: KilledClaim[];
+  unresolved: UnresolvedQuestion[];
+  next_quests: NextQuest[];
+  hypothesis_cards: HypothesisCard[];
   mvp: { name: string; reason: string };
   battle_stats: {
     total_attacks: number;
@@ -134,6 +163,7 @@ export interface BattleProposal {
     arguments_killed: number;
     fiercest_moment: string;
   };
+  graveyard_note: string;
 }
 
 export type StreamEvent =
@@ -174,6 +204,6 @@ export type StreamEvent =
     }
   | { type: "devil_verdict"; verdicts: DevilVerdict }
   | { type: "final_scores"; data: FinalScores }
-  | { type: "proposal"; data: BattleProposal }
+  | { type: "proposal"; data: DecisionMap }
   | { type: "error"; message: string }
   | { type: "done" };
